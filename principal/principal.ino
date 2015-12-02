@@ -11,14 +11,31 @@ Stepper stepper(STEPS, 10, 12, 11, 13);
 
 rgb_lcd lcd;
 
+//sensor de temperatura
+#include <math.h>
+
 //constantes pinos
 int pinLedMotorPorta = 7;       //MOTOR PORTA
 int pinLedMotorJanela = 6;       //MOTOR JANELA
 int pinLedMotorCofre = 5;       //MOTOR COFRE
+int pinLedArCond = 9;           //ar condicionado
+int pinAnalogTemperatura;       //pino de temperatura
+
+
 
 //variaveis
-int estado = 0;                 //ESTADO = 0 -> EM ESPERA, ESTADO = 1 -> PORTA , ESTADO = 2 -> JANELA, ESTADO = 3 -> COFRE
+float resistance;
+float temperature;
 
+int b = 3975;                   //b value of the thermistor
+int estado = 0;                 //ESTADO = 0 -> EM ESPERA, ESTADO = 1 -> PORTA , ESTADO = 2 -> JANELA, ESTADO = 3 -> COFRE
+int abrirPorta = 1;
+int fecharPorta = 0;
+int abrirJanela = 1;
+int fecharJanela = 0;
+int abrirCofre = 1;
+int fecharCofre = 0;
+int segurancaCofre = 1;
 
 
 void setup() {
@@ -32,9 +49,26 @@ void setup() {
 
     //Motor de passo 
     stepper.setSpeed(30);
+
+    Serial.begin(9600);
 }
 
 void loop() {
+    //controle de temperatura
+    pinAnalogTemperatura = analogRead(0);
+    
+    resistance=(float)(1023-pinAnalogTemperatura)*10000/pinAnalogTemperatura; //get the resistance of the sensor;
+    temperature=1/(log(resistance/10000)/b+1/298.15)-273.15;//convert to temperature via datasheet ;
+    if(temperature >= 23)
+      digitalWrite(pinLedArCond, HIGH);
+     else
+      digitalWrite(pinLedArCond, LOW);
+     Serial.println(temperature);
+     lcd.clear();
+     lcd.print(temperature);
+     delay(500);
+     
+    //controle de estado  
     if(estado < 3)
       estado++;
     else
@@ -42,33 +76,68 @@ void loop() {
       
     switch (estado){
       case 1:
+
+        //gerenciamento dos leds
         digitalWrite( pinLedMotorPorta, HIGH);
         digitalWrite( pinLedMotorJanela, LOW);
         digitalWrite( pinLedMotorCofre, LOW);
-        stepper.step(48);
+
+        //gerenciamento do motor
+        if(abrirPorta == 1)
+          stepper.step(48);
+        if(fecharPorta == 1)
+          stepper.step(-48);
+
+        //gerencimento do display
         lcd.clear();
         lcd.print("porta");
         delay(500);
+        
         break;  
+        
       case 2:
+        
+        //gerenciamento dos leds
         digitalWrite( pinLedMotorPorta, LOW);
         digitalWrite( pinLedMotorJanela, HIGH);
         digitalWrite( pinLedMotorCofre, LOW);
-        stepper.step(-48);
+
+        //gerenciamento do motor
+         if(abrirJanela == 1)
+          stepper.step(48);
+        if(fecharJanela == 1)
+          stepper.step(-48);
+        
+        //gerencimento do display
         lcd.clear();
         lcd.print("janela");
         delay(500);
+        
         break;
+        
       case 3:
+        
+        //gerenciamento dos leds
         digitalWrite( pinLedMotorPorta, LOW);
         digitalWrite( pinLedMotorJanela, LOW);
         digitalWrite( pinLedMotorCofre, HIGH);
-        stepper.step(48);
+
+        //gerenciamento do motor
+         if(abrirCofre == 1)
+          stepper.step(48);
+        if(fecharCofre == 1)
+          stepper.step(-48);;
+        
+        //gerenciamento do display
         lcd.clear();
         lcd.print("cofre");
         delay(500);
+        
         break;
+        
       default:
+        
+        //gerenciamento do led
         digitalWrite( pinLedMotorPorta, LOW);
         digitalWrite( pinLedMotorJanela, LOW);
         digitalWrite( pinLedMotorCofre, LOW);
