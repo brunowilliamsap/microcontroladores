@@ -25,7 +25,7 @@ int pinAnalogTemperatura;       //pino de temperatura
 
 //variaveis
 float resistance;
-float temperature;
+float leituraTemp;
 
 int b = 3975;                   //b value of the thermistor
 int estado = 0;                 //ESTADO = 0 -> EM ESPERA, ESTADO = 1 -> PORTA , ESTADO = 2 -> JANELA, ESTADO = 3 -> COFRE
@@ -36,6 +36,7 @@ int fecharJanela = 0;
 int abrirCofre = 1;
 int fecharCofre = 0;
 int segurancaCofre = 1;
+int temperatura;
 
 
 void setup() {
@@ -58,15 +59,16 @@ void loop() {
     pinAnalogTemperatura = analogRead(0);
     
     resistance=(float)(1023-pinAnalogTemperatura)*10000/pinAnalogTemperatura; //get the resistance of the sensor;
-    temperature=1/(log(resistance/10000)/b+1/298.15)-273.15;//convert to temperature via datasheet ;
-    if(temperature >= 23)
+    leituraTemp=1/(log(resistance/10000)/b+1/298.15)-273.15;//convert to temperature via datasheet ;
+    if(leituraTemp >= temperatura + 1)
       digitalWrite(pinLedArCond, HIGH);
-     else
-      digitalWrite(pinLedArCond, LOW);
-     Serial.println(temperature);
-     lcd.clear();
-     lcd.print(temperature);
-     delay(500);
+    else
+      if(leituraTemp <= temperatura - 1)
+       digitalWrite(pinLedArCond, LOW);
+    Serial.println(leituraTemp);
+    lcd.clear();
+    lcd.print(leituraTemp);
+    delay(500);
      
     //controle de estado  
     if(estado < 3)
@@ -103,7 +105,7 @@ void loop() {
         digitalWrite( pinLedMotorCofre, LOW);
 
         //gerenciamento do motor
-         if(abrirJanela == 1)
+        if(abrirJanela == 1)
           stepper.step(48);
         if(fecharJanela == 1)
           stepper.step(-48);
@@ -148,5 +150,4 @@ void loop() {
     }
     
 }
-
 
