@@ -3,6 +3,8 @@
 #include <Stepper.h>
 #define STEPS 48
 
+#include <math.h>
+
 Stepper stepper(STEPS, 10, 12, 11, 13);
 
 //lcd
@@ -15,9 +17,11 @@ rgb_lcd lcd;
 int pinLedMotorPorta = 7;       //MOTOR PORTA
 int pinLedMotorJanela = 6;       //MOTOR JANELA
 int pinLedMotorCofre = 5;       //MOTOR COFRE
+int pinLedArCond = 9;
+int pinAnalogTemperatura;
 
 //variaveis
-<<<<<<< HEAD
+
 float resistance;
 float leituraTemp;
 
@@ -31,10 +35,7 @@ int abrirCofre = 1;
 int fecharCofre = 0;
 int segurancaCofre = 1;
 int temperatura;
-=======
-int estado = 0;                 //ESTADO = 0 -> EM ESPERA, ESTADO = 1 -> PORTA , ESTADO = 2 -> JANELA, ESTADO = 3 -> COFRE
 
->>>>>>> origin/master
 
 
 void setup() {
@@ -45,13 +46,15 @@ void setup() {
     pinMode(pinLedMotorPorta, OUTPUT);
     pinMode(pinLedMotorJanela, OUTPUT);
     pinMode(pinLedMotorCofre, OUTPUT);
+    pinMode(pinLedArCond, OUTPUT);
 
     //Motor de passo 
     stepper.setSpeed(30);
+
+    Serial.begin(9600);     
 }
 
 void loop() {
-<<<<<<< HEAD
     //controle de temperatura
     pinAnalogTemperatura = analogRead(0);
     
@@ -68,8 +71,6 @@ void loop() {
     delay(500);
      
     //controle de estado  
-=======
->>>>>>> origin/master
     if(estado < 3)
       estado++;
     else
@@ -85,11 +86,11 @@ void loop() {
         lcd.print("porta");
         delay(500);
         break;  
+        
       case 2:
         digitalWrite( pinLedMotorPorta, LOW);
         digitalWrite( pinLedMotorJanela, HIGH);
         digitalWrite( pinLedMotorCofre, LOW);
-<<<<<<< HEAD
 
         //gerenciamento do motor
         if(abrirJanela == 1)
@@ -98,13 +99,11 @@ void loop() {
           stepper.step(-48);
         
         //gerencimento do display
-=======
-        stepper.step(-48);
->>>>>>> origin/master
         lcd.clear();
         lcd.print("janela");
         delay(500);
         break;
+        
       case 3:
         digitalWrite( pinLedMotorPorta, LOW);
         digitalWrite( pinLedMotorJanela, LOW);
@@ -114,6 +113,7 @@ void loop() {
         lcd.print("cofre");
         delay(500);
         break;
+        
       default:
         digitalWrite( pinLedMotorPorta, LOW);
         digitalWrite( pinLedMotorJanela, LOW);
@@ -122,6 +122,7 @@ void loop() {
         lcd.print("em espera");
         delay(500);
         break;
+        
     }
     
 }
