@@ -1,7 +1,13 @@
-
 //motor de passo
 #include <Stepper.h>
 #define STEPS 48
+#define ITENS_CONTA_MAX 10
+
+//variaveis do controle BT
+#include <SoftwareSerial.h>
+byte comando[2]; // primeiro byte o que fazer, segundo parâmetro
+SoftwareSerial celular(11,12);
+
 
 #include <math.h>
 
@@ -13,10 +19,11 @@ Stepper stepper(STEPS, 10, 12, 11, 13);
 
 rgb_lcd lcd;
 
+
 //constantes pinos
 int pinLedMotorPorta = 7;       //MOTOR PORTA
 int pinLedMotorJanela = 6;       //MOTOR JANELA
-int pinLedMotorCofre = 5;       //MOTOR COFRE
+int pinLedLuz = 5;       //luz do quarto
 int pinLedArCond = 9;
 int pinAnalogTemperatura;
 
@@ -37,24 +44,59 @@ int segurancaCofre = 1;
 int temperatura;
 
 
+//ar condicionado fictício
+int temperaturaAr= 20; //inicia em 20 graus
+
+//controle da conta
+
+String itensDescricao[10]={ "uno", "duo", "tri" };;
+float itensPreco[10];
+int itensConsumidos=0;
+float total=0;
+
+
+
 
 void setup() {
-    // set up the LCD's number of columns and rows:
-    lcd.begin(16, 2);
-
+    
+  // inicializações
+    
+  lcd.begin(16, 2);
+  Serial.begin(115200);  
+  
     //PINOS DE SAIDA
     pinMode(pinLedMotorPorta, OUTPUT);
     pinMode(pinLedMotorJanela, OUTPUT);
-    pinMode(pinLedMotorCofre, OUTPUT);
+    
     pinMode(pinLedArCond, OUTPUT);
 
     //Motor de passo 
     stepper.setSpeed(30);
 
-    Serial.begin(9600);     
+       
 }
 
 void loop() {
+  
+  //atualizacao da conta
+  while (Serial.available() > 0) {
+    itensDescricao[itensConsumidos]=Serial.readStringUntil(';');
+    itensPreco[itensConsumidos]=Serial.parseFloat();
+    itensConsumidos++;
+    total+=itensPreco[itensConsumidos];
+   
+
+   
+    if (Serial.read() == '\n') {
+     //A MODIFICAR
+    }
+  }
+  
+    String linha1 ="Hora:";
+    int hora=2;
+    linha1.concat(hora);
+    linha1.concat("Conta:");
+    linha1.concat(total);
     //controle de temperatura
     pinAnalogTemperatura = analogRead(0);
     
@@ -70,17 +112,23 @@ void loop() {
     lcd.print(leituraTemp);
     delay(500);
      
-    //controle de estado  
-    if(estado < 3)
-      estado++;
-    else
-      estado = 0;
-      
-    switch (estado){
+    //controle de estado  l
+    
+  if (celular.available())
+  { 
+     while(celular.available())
+     {
+       celular.readBytes(comando,2); 
+     } 
+   
+  } 
+  
+
+     switch (comando[0]){
       case 1:
         digitalWrite( pinLedMotorPorta, HIGH);
         digitalWrite( pinLedMotorJanela, LOW);
-        digitalWrite( pinLedMotorCofre, LOW);
+      
         stepper.step(48);
         lcd.clear();
         lcd.print("porta");
@@ -90,34 +138,49 @@ void loop() {
       case 2:
         digitalWrite( pinLedMotorPorta, LOW);
         digitalWrite( pinLedMotorJanela, HIGH);
-        digitalWrite( pinLedMotorCofre, LOW);
-
+        
+      lcd.clear();
         //gerenciamento do motor
-        if(abrirJanela == 1)
-          stepper.step(48);
-        if(fecharJanela == 1)
-          stepper.step(-48);
+        if(comando[1] == 1){
+      stepper.step(48);
+      lcd.print("Janela : <<"); 
+    }
+        else{
+      stepper.step(-48);
+      lcd.print("Janela : >>");
+     }
         
-        //gerencimento do display
-        lcd.clear();
-        lcd.print("janela");
         delay(500);
         break;
         
-      case 3:
-        digitalWrite( pinLedMotorPorta, LOW);
-        digitalWrite( pinLedMotorJanela, LOW);
-        digitalWrite( pinLedMotorCofre, HIGH);
-        stepper.step(48);
+  case 3:
+    if(comando[1]==1) {
+      temperaturaAr++;
+      
+      
+    }
+    else{
+      temperaturaAr--;
+    }
+    
+    lcd.print("Temperatura:"); 
+    lcd.print(temperaturaAr);
+     
+        delay(500);
+        break;  
+    
+    
+     case 4:
+    analogWrite(pinLedLuz,comando[1]);
         lcd.clear();
-        lcd.print("cofre");
+        lcd.print("Ajustando luz");
         delay(500);
         break;
         
-      default:
+     default:
         digitalWrite( pinLedMotorPorta, LOW);
         digitalWrite( pinLedMotorJanela, LOW);
-        digitalWrite( pinLedMotorCofre, LOW);
+
         lcd.clear();
         lcd.print("em espera");
         delay(500);
@@ -126,4 +189,3 @@ void loop() {
     }
     
 }
-

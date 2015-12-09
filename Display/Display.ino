@@ -6,7 +6,7 @@ rgb_lcd lcd;
 
 void setup() {
     // set up the LCD's number of columns and rows:
-    lcd.begin(16, 2);
+    lcd.begin(16, 3);
     // Print a message to the LCD.
    
 }
