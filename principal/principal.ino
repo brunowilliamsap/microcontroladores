@@ -6,12 +6,12 @@
 //variaveis do controle BT
 #include <SoftwareSerial.h>
 byte comando[2]; // primeiro byte o que fazer, segundo parâmetro
-SoftwareSerial celular(0,1);
+//SoftwareSerial celular(10,11);
 
 
 #include <math.h>
 
-Stepper stepper(STEPS, 10, 12, 11, 13);
+Stepper stepper(STEPS, 8, 12, 9, 13);
 
 //lcd
 #include <Wire.h>
@@ -24,7 +24,7 @@ rgb_lcd lcd;
 int pinLedMotorPorta = 7;       //MOTOR PORTA
 int pinLedMotorJanela = 6;       //MOTOR JANELA
 int pinLedLuz = 5;       //luz do quarto
-int pinLedArCond = 9;
+int pinLedArCond = 5;
 int pinAnalogTemperatura;
 
 //variaveis
@@ -54,6 +54,8 @@ float itensPreco[10];
 int itensConsumidos=0;
 float total=0;
 
+//
+int porta = 0;//porta fechada
 
 
 
@@ -62,7 +64,7 @@ void setup() {
   // inicializações
     
   lcd.begin(16, 2);
-  Serial.begin(115200);  
+  Serial.begin(9600);  
   
     //PINOS DE SAIDA
     pinMode(pinLedMotorPorta, OUTPUT);
@@ -72,13 +74,14 @@ void setup() {
 
     //Motor de passo 
     stepper.setSpeed(30);
-
+	Serial.print("funciona");
        
 }
 
 void loop() {
   
   //atualizacao da conta
+  /*
   while (Serial.available() > 0) {
     itensDescricao[itensConsumidos]=Serial.readStringUntil(';');
     itensPreco[itensConsumidos]=Serial.parseFloat();
@@ -91,6 +94,7 @@ void loop() {
      //A MODIFICAR
     }
   }
+  */
   
     String linha1 ="Hora:";
     int hora=2;
@@ -115,11 +119,11 @@ void loop() {
     //controle de estado  l
 	Serial.print(celular.available());
     
-  if (celular.available())
+  if (Serial.available())
   { 
-     while(celular.available())
+     while(Serial.available())
      {
-       celular.readBytes(comando,2); 
+       Serial.readBytes(comando,2); 
      } 
    
   } 
@@ -130,7 +134,15 @@ void loop() {
         digitalWrite( pinLedMotorPorta, HIGH);
         digitalWrite( pinLedMotorJanela, LOW);
       
-        stepper.step(48);
+		if(porta==0){
+			stepper.step(48);
+			porta==1;
+		}
+		else{
+			stepper.step(-48);
+			porta==1;
+			
+		}
         lcd.clear();
         lcd.print("porta");
         delay(500);
