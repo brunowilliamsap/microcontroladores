@@ -6,7 +6,7 @@
 //variaveis do controle BT
 #include <SoftwareSerial.h>
 byte comando[2]; // primeiro byte o que fazer, segundo parâmetro
-SoftwareSerial celular(11,12);
+SoftwareSerial celular(0,1);
 
 
 #include <math.h>
@@ -113,6 +113,7 @@ void loop() {
     delay(500);
      
     //controle de estado  l
+	Serial.print(celular.available());
     
   if (celular.available())
   { 
@@ -155,12 +156,12 @@ void loop() {
         
   case 3:
     if(comando[1]==1) {
-      temperaturaAr++;
+      temperatura++;
       
       
     }
     else{
-      temperaturaAr--;
+      temperatura--;
     }
     
     lcd.print("Temperatura:"); 
