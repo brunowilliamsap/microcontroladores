@@ -21,7 +21,7 @@ int pinAnalogTemperatura;
 //variaveis
 float temperatura = 25;
 int luzLigada;
-int intensidade;
+
 float resistance;
 float leituraTemp;
 int constTemperatura = 3975;
@@ -30,13 +30,16 @@ float itensPreco[10];
 int itensConsumidos=0;
 float total=0;
 //intensidadeLuz
-int intensidadeLuz=255;
+int intensidade=255;
 //feedBack
 int comandos=0; //comandos executados
 long int tempoInicial;
 int minutos,segundos;
 //porta inicia fechada
 int porta=0;
+
+//luz inicia apagada
+int estadoLuz=0;
 void setup(){
     //LCD
     lcd.begin(16, 2);
@@ -47,24 +50,27 @@ void setup(){
     //portas digitais
     pinMode(pinLedPorta, OUTPUT);
     pinMode(pinLedJanela, OUTPUT);
+
+    String fromHotel="Bem vindo ao nosso Hotel!";
+    Serial.println(fromHotel);
 }
 void loop() {
     //comunicados do hotel
-    String fromHotel="Bem vindo ao nosso Hotel!";
-    Serial.print(fromHotel);
+    
     //lcd
-    String linha1 ="Hora:";
-    int hora=2;
-    linha1.concat(hora);
-    linha1.concat("Conta:");
-    linha1.concat(total);
+    String linha1 ="Hora:HH:MM";
+    linha1.concat("Conta:r$ xx,xx");
+    
     //leitura do controle do ar condicionado
     pinAnalogTemperatura = analogRead(0);
     resistance=(float)(1023-pinAnalogTemperatura)*10000/pinAnalogTemperatura; //get the resistance of the sensor;
     leituraTemp=1/(log(resistance/10000)/constTemperatura+1/298.15)-273.15;//convert to temperature via datasheet ;
+    Serial.println(leituraTemp);
     //controle temperauta
-    if(leituraTemp >= temperatura + 1)
+    if(leituraTemp >= temperatura + 1){
     digitalWrite(pinLedArCond, HIGH);
+    
+    }
     else
     if(leituraTemp <= temperatura - 1)
     digitalWrite(pinLedArCond, LOW);
@@ -76,7 +82,7 @@ void loop() {
     if (Serial.available() > 0) {
         estado = Serial.read();
         comandos++;
-        lcd.setCursor(1,0);//status na linha 2
+        lcd.setCursor(0,1);//status na linha 2
         switch (estado) {
             case 'a':                                 //abrir porta
             digitalWrite(pinLedPorta, HIGH);
@@ -129,46 +135,77 @@ void loop() {
             lcd.print("          ");
             delay(500);
             break;
+            
+            
             case 'g':                                //liga a luz
             //lcd luz
+            if(estadoLuz==0){  
+              estadoLuz==1;
+            }
+            
             lcd.print("Aumentar Luz");
             if(intensidade<245){
                 intensidade+=10;
             }
+
             analogWrite(pinLedLuz,intensidade);
+           
             break;
+
+            
             case 'h':
             //lcd luz
+            if(estadoLuz==0){  
+              estadoLuz==1;
+            }
+            
             lcd.print("diminuir luz");
             if(intensidade>10){
                 intensidade-=10;
             }
             analogWrite(pinLedLuz,intensidade);
             break;
+
+            
             case 'i': //comandos
+            comandos--;
             lcd.print(comandos);
             lcd.print(" comandos");
             Serial.print(comandos);
-            Serial.print(" comandos");
+            Serial.println(" comandos");
+
+            break;
             case 'j': //tempo decorrido
             //lcd luz
-            segundos=millis()*1000;
+            minutos=0;
+            segundos=millis()/1000;
             minutos=segundos/60;
-            if(minutos==0){
+            if(minutos<1){
                 lcd.print(segundos);
                 lcd.print(" segundos");
                 Serial.print(segundos);
-                Serial.print(" segundos");
+                Serial.println(" segundos");
             }
             else{
                 lcd.print(minutos);
                 lcd.print(" minutos");
                 Serial.print(minutos);
-                Serial.print(" minutos");
+                Serial.println(" minutos");
             }
             break;
-            default:                                //diminui a intensidade da luz
-            //lcd intensidade da luz
+            
+            case 'z': //comandos
+            if(estadoLuz==0){  
+              estadoLuz=1;
+              analogWrite(pinLedLuz,intensidade);
+            }
+            else{
+              estadoLuz=0;
+              analogWrite(pinLedLuz,0);
+            }
+            
+            break;
+            default:                               
             lcd.print("ocioso");
             delay(500);
             break;
