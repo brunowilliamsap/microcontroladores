@@ -58,14 +58,14 @@ void loop() {
     //comunicados do hotel
     
     //lcd
-    String linha1 ="Hora:HH:MM";
-    linha1.concat("Conta:r$ xx,xx");
+    String linha1 ="Bem vindo!";
+
     
     //leitura do controle do ar condicionado
     pinAnalogTemperatura = analogRead(0);
     resistance=(float)(1023-pinAnalogTemperatura)*10000/pinAnalogTemperatura; //get the resistance of the sensor;
     leituraTemp=1/(log(resistance/10000)/constTemperatura+1/298.15)-273.15;//convert to temperature via datasheet ;
-    Serial.println(leituraTemp);
+    
     //controle temperauta
     if(leituraTemp >= temperatura + 1){
     digitalWrite(pinLedArCond, HIGH);
@@ -78,7 +78,7 @@ void loop() {
     //Serial.println(leituraTemp);
     lcd.clear();
     lcd.print(linha1);//hora e conta na linha 1
-    
+    delay(400);
     if (Serial.available() > 0) {
         estado = Serial.read();
         comandos++;
@@ -88,8 +88,9 @@ void loop() {
             digitalWrite(pinLedPorta, HIGH);
             digitalWrite(pinLedJanela, LOW);
             //lcd porta
-            lcd.print("porta           ");
+            
             if(porta==0){
+                lcd.print("porta abrindo");
                 motor.step(48);
                 digitalWrite(pinLedPorta, LOW);
                 porta=1;
@@ -99,7 +100,7 @@ void loop() {
                 digitalWrite(pinLedPorta, HIGH);
                 digitalWrite(pinLedJanela, LOW);
                 //lcd porta
-                lcd.print("porta              ");
+                lcd.print("porta fechando");
                 motor.step(-48);
                 digitalWrite(pinLedPorta, LOW);
                 porta=0;
