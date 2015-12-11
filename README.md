@@ -72,7 +72,7 @@ Dois botões de feedback informam o usuário a quantidade de comandos já execut
 ![My terminal] (https://github.com/brunowilliamsap/microcontroladores/blob/master/Imagens/terminal.png)
 
 
-O aplicativo, Controle Hotel, se encontra disponível para download nesse repositório.
+O aplicativo, Controle Hotel, encontra-se disponível para download nesse repositório.
 
 ## Outros trabalhos desta disciplina
 
