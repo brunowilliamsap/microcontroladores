@@ -44,7 +44,7 @@ O usuário se conecta ao quarto via bluetooth, utilizando um aplicativo para and
 * 1 celular android
 
 ##Esquema elétrico
-![My plantaEletrica] (https://github.com/brunowilliamsap/microcontroladores/blob/master/Imagens/plantaEletrica.jpg)
+![My painelEletrica] (https://github.com/brunowilliamsap/microcontroladores/blob/master/Imagens/painelEletrica.jpg)
 
 ##Funcionamento
 O aplicativo do celular enviará caracteres do tipo char, que será recebido pelo módulo bluetooth. Este por sua vez envia as informações para o arduino que dependendo do caractere recebido executa uma função diferente.
