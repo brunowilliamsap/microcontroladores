@@ -117,7 +117,7 @@ void loop() {
     delay(500);
      
     //controle de estado  l
-	Serial.print(celular.available());
+	Serial.print("olha isso bruno");
     
   if (Serial.available())
   { 
