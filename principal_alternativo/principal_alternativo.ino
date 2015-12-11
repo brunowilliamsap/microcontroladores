@@ -72,10 +72,11 @@ void loop() {
     //Serial.println(leituraTemp);
     lcd.clear();
     lcd.print(linha1);//hora e conta na linha 1
-    lcd.setCursor(1,0);//status na linha 2
+    
     if (Serial.available() > 0) {
         estado = Serial.read();
         comandos++;
+        lcd.setCursor(1,0);//status na linha 2
         switch (estado) {
             case 'a':                                 //abrir porta
             digitalWrite(pinLedPorta, HIGH);
@@ -85,7 +86,7 @@ void loop() {
             if(porta==0){
                 motor.step(48);
                 digitalWrite(pinLedPorta, LOW);
-                porta==1;
+                porta=1;
             }
             else{
                 //fechar porta
